@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X, Phone, Clock, Shield, Users, Zap, MapPin, Heart, 
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -121,12 +122,12 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center">
+            <Link to="/" className="flex items-center">
               <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
                 <Heart className="w-5 h-5 text-white" />
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900">LifeLine</span>
-            </div>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
@@ -140,6 +141,20 @@ const Index = () => {
                 </a>
               ))}
             </nav>
+
+            {/* Auth Buttons */}
+            <div className="hidden md:flex items-center space-x-4">
+              <Link to="/login">
+                <Button variant="outline" className="border-red-600 text-red-600 hover:bg-red-50">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+                  Register
+                </Button>
+              </Link>
+            </div>
 
             {/* Mobile menu button */}
             <button
@@ -164,6 +179,18 @@ const Index = () => {
                     {item}
                   </a>
                 ))}
+                <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200">
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full border-red-600 text-red-600 hover:bg-red-50">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white">
+                      Register
+                    </Button>
+                  </Link>
+                </div>
               </nav>
             </div>
           )}

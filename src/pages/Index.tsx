@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChevronDown, Menu, X, Phone, Clock, Shield, Users, Zap, MapPin, Heart, ArrowRight, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +7,14 @@ import { Link } from "react-router-dom";
 
 const Index = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMobileMenuOpen(false);
+  };
 
   const whoWeHelp = [
     {
@@ -131,15 +138,24 @@ const Index = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
-              {["Home", "About", "How It Works", "Contact"].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(" ", "-")}`}
-                  className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors"
-                >
-                  {item}
-                </a>
-              ))}
+              <button
+                onClick={() => scrollToSection('home')}
+                className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => scrollToSection('about')}
+                className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors"
+              >
+                About
+              </button>
+              <button
+                onClick={() => scrollToSection('how-it-works')}
+                className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors"
+              >
+                How It Works
+              </button>
             </nav>
 
             {/* Auth Buttons */}
@@ -169,16 +185,24 @@ const Index = () => {
           {isMobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-200">
               <nav className="flex flex-col space-y-2">
-                {["Home", "About", "How It Works", "Contact"].map((item) => (
-                  <a
-                    key={item}
-                    href={`#${item.toLowerCase().replace(" ", "-")}`}
-                    className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item}
-                  </a>
-                ))}
+                <button
+                  onClick={() => scrollToSection('home')}
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors text-left"
+                >
+                  Home
+                </button>
+                <button
+                  onClick={() => scrollToSection('about')}
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors text-left"
+                >
+                  About
+                </button>
+                <button
+                  onClick={() => scrollToSection('how-it-works')}
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors text-left"
+                >
+                  How It Works
+                </button>
                 <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200">
                   <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button variant="outline" className="w-full border-red-600 text-red-600 hover:bg-red-50">
@@ -198,7 +222,7 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-blue-50">
+      <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-blue-50">
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-blue-500/5"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-4xl mx-auto">
@@ -211,7 +235,11 @@ const Index = () => {
               Save lives faster by connecting vehicles, ambulances, and hospitals in real time.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 text-lg"
+                onClick={() => scrollToSection('how-it-works')}
+              >
                 Explore How It Works
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>

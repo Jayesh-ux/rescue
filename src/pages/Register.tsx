@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import { Heart, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -11,16 +14,22 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    phone: "",
-    role: "driver",
-    licenseNumber: "",
+    phoneNumber: "",
+    role: "vehicle_driver" as "vehicle_driver" | "ambulance_driver" | "hospital_admin",
+    // Vehicle Driver specific
+    vehicleNumber: "",
+    vehicleType: "",
+    emergencyContactNumber: "",
+    clinicalHistory: "",
+    // Hospital specific
     hospitalName: "",
-    emergencyContact: ""
+    hospitalAddress: "",
+    hospitalPhoneNumber: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -29,78 +38,161 @@ const Register = () => {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords don't match!");
+      return;
+    }
+
+    // Here you would integrate with Firebase Auth and Firestore
+    console.log("Registration data:", {
+      // Base User object
+      user: {
+        name: formData.name,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        role: formData.role,
+        // password will be handled by Firebase Auth
+      },
+      // Role-specific data
+      roleSpecificData: getRoleSpecificData()
+    });
+    
     // Simulate registration - redirect to login
     window.location.href = "/login";
   };
 
+  const getRoleSpecificData = () => {
+    switch (formData.role) {
+      case "vehicle_driver":
+        return {
+          vehicleNumber: formData.vehicleNumber,
+          vehicleType: formData.vehicleType,
+          emergencyContactNumber: formData.emergencyContactNumber,
+          clinicalHistory: formData.clinicalHistory || undefined
+        };
+      case "ambulance_driver":
+        return {
+          vehicleNumber: formData.vehicleNumber,
+          hospitalId: undefined // Will be assigned when accepting requests
+        };
+      case "hospital_admin":
+        return {
+          name: formData.hospitalName,
+          address: formData.hospitalAddress,
+          phoneNumber: formData.hospitalPhoneNumber,
+          // location (GeoPoint) would be set via geocoding the address
+        };
+      default:
+        return {};
+    }
+  };
+
   const renderRoleSpecificFields = () => {
     switch (formData.role) {
-      case "driver":
+      case "vehicle_driver":
         return (
           <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Driver's License Number
-              </label>
-              <input
-                type="text"
-                name="licenseNumber"
-                value={formData.licenseNumber}
+            <div className="space-y-2">
+              <Label htmlFor="vehicleNumber">Vehicle Number</Label>
+              <Input
+                id="vehicleNumber"
+                name="vehicleNumber"
+                value={formData.vehicleNumber}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Enter license number"
+                placeholder="Enter vehicle number"
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Emergency Contact
-              </label>
-              <input
-                type="tel"
-                name="emergencyContact"
-                value={formData.emergencyContact}
+            <div className="space-y-2">
+              <Label htmlFor="vehicleType">Vehicle Type</Label>
+              <Input
+                id="vehicleType"
+                name="vehicleType"
+                value={formData.vehicleType}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Emergency contact number"
+                placeholder="e.g., Car, Motorcycle, Truck"
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="emergencyContactNumber">Emergency Contact Number</Label>
+              <Input
+                id="emergencyContactNumber"
+                name="emergencyContactNumber"
+                type="tel"
+                value={formData.emergencyContactNumber}
+                onChange={handleChange}
+                placeholder="Family member emergency contact"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clinicalHistory">Clinical History (Optional)</Label>
+              <Textarea
+                id="clinicalHistory"
+                name="clinicalHistory"
+                value={formData.clinicalHistory}
+                onChange={handleChange}
+                placeholder="Any relevant medical history"
+                className="min-h-[80px]"
               />
             </div>
           </>
         );
-      case "ambulance":
+      case "ambulance_driver":
         return (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ambulance License Number
-            </label>
-            <input
-              type="text"
-              name="licenseNumber"
-              value={formData.licenseNumber}
+          <div className="space-y-2">
+            <Label htmlFor="vehicleNumber">Ambulance Number</Label>
+            <Input
+              id="vehicleNumber"
+              name="vehicleNumber"
+              value={formData.vehicleNumber}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              placeholder="Enter ambulance license"
+              placeholder="Enter ambulance number"
               required
             />
           </div>
         );
-      case "hospital":
+      case "hospital_admin":
         return (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hospital Name
-            </label>
-            <input
-              type="text"
-              name="hospitalName"
-              value={formData.hospitalName}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              placeholder="Enter hospital name"
-              required
-            />
-          </div>
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="hospitalName">Hospital Name</Label>
+              <Input
+                id="hospitalName"
+                name="hospitalName"
+                value={formData.hospitalName}
+                onChange={handleChange}
+                placeholder="Enter hospital name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hospitalAddress">Hospital Address</Label>
+              <Textarea
+                id="hospitalAddress"
+                name="hospitalAddress"
+                value={formData.hospitalAddress}
+                onChange={handleChange}
+                placeholder="Enter complete hospital address"
+                className="min-h-[80px]"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hospitalPhoneNumber">Hospital Phone Number</Label>
+              <Input
+                id="hospitalPhoneNumber"
+                name="hospitalPhoneNumber"
+                type="tel"
+                value={formData.hospitalPhoneNumber}
+                onChange={handleChange}
+                placeholder="Hospital contact number"
+                required
+              />
+            </div>
+          </>
         );
       default:
         return null;
@@ -132,65 +224,57 @@ const Register = () => {
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
               {/* Role Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Register as
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="role">Register as</Label>
                 <select
+                  id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 >
-                  <option value="driver">Vehicle Driver</option>
-                  <option value="ambulance">Ambulance Driver</option>
-                  <option value="hospital">Hospital Admin</option>
+                  <option value="vehicle_driver">Vehicle Driver</option>
+                  <option value="ambulance_driver">Ambulance Driver</option>
+                  <option value="hospital_admin">Hospital Admin</option>
                 </select>
               </div>
 
               {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   placeholder="Enter your full name"
                   required
                 />
               </div>
 
               {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
                   name="email"
+                  type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   placeholder="Enter your email"
                   required
                 />
               </div>
 
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
+              {/* Phone Number */}
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
                   type="tel"
-                  name="phone"
-                  value={formData.phone}
+                  value={formData.phoneNumber}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   placeholder="Enter your phone number"
                   required
                 />
@@ -200,18 +284,17 @@ const Register = () => {
               {renderRoleSpecificFields()}
 
               {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
+                  <Input
+                    id="password"
                     name="password"
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent pr-10"
                     placeholder="Enter your password"
+                    className="pr-10"
                     required
                   />
                   <button
@@ -229,18 +312,17 @@ const Register = () => {
               </div>
 
               {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
+                  <Input
+                    id="confirmPassword"
                     name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent pr-10"
                     placeholder="Confirm your password"
+                    className="pr-10"
                     required
                   />
                   <button

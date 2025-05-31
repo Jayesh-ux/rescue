@@ -1,12 +1,19 @@
+
 import { useState } from "react";
 import { ChevronDown, Menu, X, Phone, Clock, Shield, Users, Zap, MapPin, Heart, ArrowRight, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import EmergencyModal from "@/components/EmergencyModal";
+import { useScrollAnimations } from "@/hooks/useScrollAnimations";
 
 const Index = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
+
+  // Initialize GSAP scroll animations
+  useScrollAnimations();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -226,15 +233,15 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-blue-500/5"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="hero-title text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Smart Accident
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-700"> Response </span>
               System
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
+            <p className="hero-subtitle text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
               Save lives faster by connecting vehicles, ambulances, and hospitals in real time.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="hero-buttons flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 text-lg"
@@ -243,7 +250,12 @@ const Index = () => {
                 Explore How It Works
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-              <Button size="lg" variant="outline" className="border-red-600 text-red-600 hover:bg-red-50 px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-red-600 text-red-600 hover:bg-red-50 px-8 py-4 text-lg"
+                onClick={() => setIsEmergencyModalOpen(true)}
+              >
                 Get Help Now
                 <Phone className="ml-2 w-5 h-5" />
               </Button>
@@ -256,7 +268,7 @@ const Index = () => {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Who We Help</h2>
+            <h2 className="section-title text-3xl md:text-4xl font-bold text-gray-900 mb-4">Who We Help</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Our platform connects all key stakeholders in emergency response
             </p>
@@ -264,7 +276,7 @@ const Index = () => {
           
           <div className="grid md:grid-cols-3 gap-8">
             {whoWeHelp.map((item, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+              <Card key={index} className="animate-card group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
                 <CardContent className="p-8 text-center">
                   <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-r ${item.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                     <item.icon className="w-8 h-8 text-white" />
@@ -282,7 +294,7 @@ const Index = () => {
       <section id="how-it-works" className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <h2 className="section-title text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Simple, fast, and efficient emergency response in 5 steps
             </p>
@@ -290,7 +302,7 @@ const Index = () => {
 
           <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-5 md:gap-4">
             {workflowSteps.map((step, index) => (
-              <div key={index} className="relative">
+              <div key={index} className="workflow-step relative">
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4 relative">
                     <step.icon className="w-8 h-8 text-white" />
@@ -314,7 +326,7 @@ const Index = () => {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Key Features</h2>
+            <h2 className="section-title text-3xl md:text-4xl font-bold text-gray-900 mb-4">Key Features</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Advanced technology ensuring rapid and reliable emergency response
             </p>
@@ -322,7 +334,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {keyFeatures.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+              <Card key={index} className="animate-card group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
@@ -432,6 +444,12 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Emergency Modal */}
+      <EmergencyModal 
+        isOpen={isEmergencyModalOpen} 
+        onClose={() => setIsEmergencyModalOpen(false)} 
+      />
     </div>
   );
 };

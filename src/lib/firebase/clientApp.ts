@@ -1,14 +1,17 @@
+
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getAnalytics, Analytics } from 'firebase/analytics';
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyA9wjTyMBy6vflmYJ4CqunrsHhYa2apb7I",
+  authDomain: "ambulance-dispatch-syste-f9714.firebaseapp.com",
+  projectId: "ambulance-dispatch-syste-f9714",
+  storageBucket: "ambulance-dispatch-syste-f9714.firebasestorage.app",
+  messagingSenderId: "950623243397",
+  appId: "1:950623243397:web:7eb52dbc8544f392bdedec",
+  measurementId: "G-P3MV5NTK92"
 };
 
 // Client-side Firebase initialization
@@ -17,10 +20,18 @@ export const initializeClientApp = () => {
   
   if (!apps.length) {
     const app = initializeApp(firebaseConfig);
+    
+    // Initialize Analytics only in browser environment
+    let analytics: Analytics | null = null;
+    if (typeof window !== 'undefined') {
+      analytics = getAnalytics(app);
+    }
+    
     return {
       app,
       auth: getAuth(app),
       db: getFirestore(app),
+      analytics,
     };
   }
   
@@ -28,8 +39,9 @@ export const initializeClientApp = () => {
     app: apps[0],
     auth: getAuth(apps[0]),
     db: getFirestore(apps[0]),
+    analytics: typeof window !== 'undefined' ? getAnalytics(apps[0]) : null,
   };
 };
 
 // Export initialized Firebase instances
-export const { app, auth, db } = initializeClientApp();
+export const { app, auth, db, analytics } = initializeClientApp();

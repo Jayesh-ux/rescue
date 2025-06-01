@@ -1,6 +1,7 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeAdminApp } from '@/lib/firebase/config';
-import { Timestamp } from 'firebase-admin/firestore';
+import { Timestamp, GeoPoint } from 'firebase-admin/firestore';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
         id: hospitalRef.id,
         name: userData.hospitalName,
         address: userData.address,
-        location: new admin.firestore.GeoPoint(
+        location: new GeoPoint(
           userData.location.latitude,
           userData.location.longitude
         ),

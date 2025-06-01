@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeAdminApp } from '@/lib/firebase/config';
 import { Timestamp } from 'firebase-admin/firestore';
@@ -95,3 +96,26 @@ export async function GET(request: NextRequest) {
       // Get assignments for this hospital
       const assignmentsSnapshot = await db.collection('assignments')
         .where('hospitalId', '==', hospitalId)
+        .get();
+      
+      const accidentIds = assignmentsSnapshot.docs.map(doc => doc.data().accidentId);
+      
+      if (accidentIds.length > 0) {
+        accidentsQuery = accidentsQuery.where('id', 'in', accidentIds);
+      } else {
+        return NextResponse.json({ accidents: [] });
+      }
+    }
+    
+    const accidentsSnapshot = await accidentsQuery.orderBy('timestamp', 'desc').get();
+    const accidents = accidentsSnapshot.docs.map(doc => doc.data());
+    
+    return NextResponse.json({ accidents });
+  } catch (error: any) {
+    console.error('Get accidents error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch accidents' },
+      { status: 500 }
+    );
+  }
+}

@@ -1,129 +1,97 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { 
-  User, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase/clientApp';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { auth, db } from '../config/firebase';import { AuthService } from '../services/authService';
+import { User, VehicleDriverData, AmbulanceDriverData, HospitalAdminData } from '../types/models';
 
 interface AuthContextType {
   currentUser: User | null;
+  firebaseUser: FirebaseUser | null;
   userRole: string | null;
   loading: boolean;
-  register: (email: string, password: string, role: string, userData: any) => Promise<void>;
+  register: (userData: VehicleDriverData | AmbulanceDriverData | HospitalAdminData) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function register(email: string, password: string, role: string, userData: any) {
+  const register = async (userData: VehicleDriverData | AmbulanceDriverData | HospitalAdminData) => {
+    setLoading(true);
     try {
-      // Create user in Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        id: user.uid,
-        email: user.email,
-        name: userData.name,
-        phoneNumber: userData.phoneNumber,
-        role: role,
-        createdAt: Timestamp.now(),
-      });
-      
-      // Create role-specific document
-      if (role === 'vehicle_driver') {
-        await setDoc(doc(db, 'vehicleDrivers', user.uid), {
-          userId: user.uid,
-          name: userData.name,
-          vehicleNumber: userData.vehicleNumber,
-          vehicleType: userData.vehicleType,
-          emergencyContactNumber: userData.emergencyContactNumber,
-          clinicalHistory: userData.clinicalHistory || '',
-        });
-      } else if (role === 'ambulance_driver') {
-        await setDoc(doc(db, 'ambulanceDrivers', user.uid), {
-          userId: user.uid,
-          name: userData.name,
-          vehicleNumber: userData.vehicleNumber,
-          hospitalId: userData.hospitalId || null,
-        });
-      } else if (role === 'hospital_admin') {
-        const hospitalId = doc(db, 'hospitals', 'temp').id; // Generate a new ID
-        
-        await setDoc(doc(db, 'hospitals', hospitalId), {
-          id: hospitalId,
-          name: userData.hospitalName,
-          address: userData.address,
-          location: userData.location,
-          phoneNumber: userData.phoneNumber,
-          adminUserId: user.uid,
-        });
-      }
+      await AuthService.registerUser(userData);
     } catch (error) {
-      console.error("Error during registration:", error);
+      console.error('Registration failed:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  async function login(email: string, password: string) {
+  const login = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await AuthService.loginUser(email, password);
     } catch (error) {
-      console.error("Error during login:", error);
+      console.error('Login failed:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  async function logout() {
+  const logout = async () => {
+    setLoading(true);
     try {
-      await signOut(auth);
+      await AuthService.logoutUser();
+      setCurrentUser(null);
+      setFirebaseUser(null);
+      setUserRole(null);
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error('Logout failed:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
+      setLoading(true);
       if (user) {
-        // Fetch user role from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          setUserRole(userDoc.data().role);
+        setFirebaseUser(user);
+        const userData = await AuthService.getCurrentUserData(user.uid);
+        if (userData) {
+          setCurrentUser(userData);
+          setUserRole(userData.role);
         }
       } else {
+        setFirebaseUser(null);
+        setCurrentUser(null);
         setUserRole(null);
       }
-      
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
 
-  const value = {
+  const value: AuthContextType = {
     currentUser,
+    firebaseUser,
     userRole,
     loading,
     register,
@@ -133,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
-}
+};

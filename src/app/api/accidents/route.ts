@@ -75,7 +75,8 @@ export async function GET(request: NextRequest) {
     }
     
     const userRole = userDoc.data()?.role;
-    let accidentsQuery = db.collection('accidents');
+    const accidentsRef = db.collection('accidents');
+    let accidentsQuery = accidentsRef;
     
     // Filter based on role
     if (userRole === 'vehicle_driver') {
